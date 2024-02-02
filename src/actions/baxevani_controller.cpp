@@ -5,6 +5,8 @@
 #include "project11/utils.h"
 #include <tf2_ros/buffer.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/Vector3Stamped.h>
+#include <std_msgs/Float32.h>
 
 namespace project11_navigation
 {
@@ -12,6 +14,14 @@ namespace project11_navigation
 BaxevaniController::BaxevaniController(const std::string& name, const BT::NodeConfig& config):
   BT::StatefulActionNode(name, config)
 {
+  ros::NodeHandle nh("~");
+
+
+  acceleration_pub_ = nh.advertise<geometry_msgs::Vector3Stamped>("baxevani/debug/acceleration", 1);
+  angular_acceleration_pub_ = nh.advertise<std_msgs::Float32>("baxevani/debug/angular_acceleration", 1);
+  u_pub_ = nh.advertise<std_msgs::Float32>("baxevani/debug/u", 1);
+  a_pub_= nh.advertise<std_msgs::Float32>("baxevani/debug/a", 1);
+  alpha_pub_ = nh.advertise<std_msgs::Float32>("baxevani/debug/alpha", 1);
 
 }
 
@@ -187,6 +197,20 @@ BT::NodeStatus BaxevaniController::onRunning()
     double acc_y = (sensor_vely - prev_sensor_vely) / dt; //Acceleration on the sway axis
     double acc_w = (sensor_velw - prev_sensor_velw) / dt; //Acceleration on the sway axis
 
+    geometry_msgs::Vector3Stamped acceleration_msg;
+    acceleration_msg.header = odom.value().header;
+    acceleration_msg.header.frame_id = odom.value().child_frame_id;
+    acceleration_msg.vector.x = acc_x;
+    acceleration_msg.vector.y = acc_y;
+
+    acceleration_pub_.publish(acceleration_msg);
+
+    std_msgs::Float32 angular_acceleration_msg;
+    angular_acceleration_msg.data = acc_w;
+
+    angular_acceleration_pub_.publish(angular_acceleration_msg);
+    
+
     double u = -(current_y + delta * sin(theta)) / sqrt(r) -
         (sensor_velx * sin(-theta) + (sensor_vely + delta * sensor_velw)
          * cos(-theta)) * sqrt(2.0) / pow(r, (1.0 / 4.0)); // Optimal feedback law for the system
@@ -199,9 +223,21 @@ BT::NodeStatus BaxevaniController::onRunning()
         cos(theta) / delta - sensor_velx * sensor_velw / delta - 1 / delta *
         acc_y + 2 * cos(heading) * sin(heading) * sensor_vely * sensor_velw / delta; // Angular acceleration around z axis
 
-    cmd_vel.twist.linear.x = 1*(prev_sensor_velx + acc_x*dt + px_gain*(a-acc_x)*pow(dt,2.0));
+    std_msgs::Float32 u_msg;
+    u_msg.data = u;
+    u_pub_.publish(u_msg);
+
+    std_msgs::Float32 a_msg;
+    a_msg.data = a;
+    a_pub_.publish(a_msg);
+
+    std_msgs::Float32 alpha_msg;
+    alpha_msg.data = alpha;
+    alpha_pub_.publish(alpha_msg);
+
+    cmd_vel.twist.linear.x = 1.0*(prev_sensor_velx + acc_x*dt + px_gain*(a-acc_x)*pow(dt,2.0));
     cmd_vel.twist.linear.y = 0.0;
-    cmd_vel.twist.angular.z = 1*(prev_sensor_velw + acc_w*dt + pw_gain*(alpha-acc_w)*pow(dt,2.0));
+    cmd_vel.twist.angular.z = 1.0*(prev_sensor_velw + acc_w*dt + pw_gain*(alpha-acc_w)*pow(dt,2.0));
 
   }
 

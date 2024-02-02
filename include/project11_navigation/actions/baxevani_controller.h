@@ -3,6 +3,7 @@
 
 #include <behaviortree_cpp/bt_factory.h>
 #include <nav_msgs/Odometry.h>
+#include <ros/ros.h>
 
 namespace project11_navigation
 {
@@ -20,6 +21,13 @@ public:
 
 private:
   nav_msgs::Odometry last_odom_;
+
+  ros::Publisher acceleration_pub_;
+  ros::Publisher angular_acceleration_pub_;
+  ros::Publisher u_pub_;
+  ros::Publisher a_pub_;
+  ros::Publisher alpha_pub_;
+
 };
 
 } // namespace path_follower
