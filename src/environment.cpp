@@ -15,6 +15,9 @@ Environment::Environment()
       static_grids_[sg.first].subscribe(topic);
     }
   }
+
+  ros::NodeHandle nh;
+  local_costmap_subscriber_ = nh.subscribe("local_costmap", 1, &Environment::occupancyGridCallback, this);
 }
 
 Environment::Snapshot Environment::snapshot(bool dynamic_only) const
@@ -40,6 +43,17 @@ std::string Environment::mapFrame() const
     return dynamic_grids_.begin()->second.grid_map.getFrameId();
   return "";
 }
+
+void Environment::occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr &data)
+{
+  local_costmap_ = *data;
+}
+
+std::shared_ptr<OccupancyGrid> Environment::localCostmap() const
+{
+  return std::make_shared<OccupancyGrid>(local_costmap_);
+}
+
 
 void Environment::Grid::subscribe(std::string topic)
 {

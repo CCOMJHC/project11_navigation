@@ -24,7 +24,8 @@ BT::PortsList UpdateState::providedPorts()
     BT::OutputPort<geometry_msgs::TwistStamped>("command_velocity"),
     BT::OutputPort<std::shared_ptr<tf2_ros::Buffer> >("tf_buffer"),
     BT::OutputPort<std::shared_ptr<visualization_msgs::MarkerArray> >("marker_array"),
-    BT::InputPort<geometry_msgs::Polygon>("robot_footprint")
+    BT::InputPort<geometry_msgs::Polygon>("robot_footprint"),
+    BT::OutputPort<std::shared_ptr<OccupancyGrid> >("local_costmap")
   };
 }
 
@@ -55,6 +56,8 @@ BT::NodeStatus UpdateState::tick()
     context.value()->robot().updateMarkers(*marker_array, footprint.value());
   }
   setOutput("marker_array", marker_array);
+
+  setOutput("local_costmap", context.value()->environment().localCostmap());
 
   return BT::NodeStatus::SUCCESS;
 }

@@ -1,3 +1,4 @@
+#include <project11_navigation/actions/adjust_path.h>
 #include <project11_navigation/actions/baxevani_controller.h>
 #include <project11_navigation/actions/crabbing_path_follower.h>
 #include <project11_navigation/actions/debug_blackboard.h>
@@ -24,6 +25,7 @@
 
 BT_REGISTER_NODES(factory)
 {
+  factory.registerNodeType<project11_navigation::AdjustPath>("AdjustPath");
   factory.registerNodeType<project11_navigation::BaxevaniController>("BaxevaniController");
   factory.registerNodeType<project11_navigation::CrabbingPathFollower>("CrabbingPathFollower");
   factory.registerNodeType<project11_navigation::DebugBlackboard>("DebugBlackboard");

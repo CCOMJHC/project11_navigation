@@ -20,6 +20,27 @@
                            future_color=".25, .25, .4, .5"
                            current_segment="{current_navigation_segment}"
                            current_pose="{current_pose}"/>
+      <AdjustPath path="{path}"
+                  local_costmap="{local_costmap}"
+                  turn_radius="{turn_radius}"
+                  adjusted_path="{adjusted_path}"
+                  current_segment="{current_navigation_segment}"
+                  odometry="{odometry}"
+                  tf_buffer="{tf_buffer}"
+                  adjusted_current_segment="{adjusted_current_segment}"
+                  adjusted_cross_track_error="{adjusted_cross_track_error}"
+                  adjusted_along_track_progress="{adjusted_along_track_progress}"
+                  adjusted_segment_count="{adjusted_segment_count}"/>
+      <VisualizeTrajectory name="VisualizeAdjustedTrajectory"
+                           trajectory="{adjusted_path}"
+                           marker_array="{marker_array}"
+                           namespace="adjusted_transit"
+                           scale="1.0"
+                           past_color=".25, .25, .25, .5"
+                           current_color=".35, .35, .5, .75"
+                           future_color=".25, .25, .4, .5"
+                           current_segment="{adjusted_current_segment}"
+                           current_pose="{current_pose}"/>
       <Fallback>
         <BaxevaniController navigation_path="{navigation_path}"
                             current_navigation_segment="{current_navigation_segment}"
@@ -128,7 +149,8 @@
                          tf_buffer="{tf_buffer}"
                          marker_array="{marker_array}"
                          robot_footprint="{robot_footprint}"
-                         context="{context}"/>
+                         context="{context}"
+                         local_costmap="{local_costmap}"/>
             <SubTree ID="UpdateCurrentTaskData"
                      _autoremap="true"/>
             <ReactiveFallback name="RunTaskByType">
@@ -277,6 +299,31 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
+    <Action ID="AdjustPath"
+            editable="true">
+      <input_port name="path"
+                  default="{path}"/>
+      <input_port name="local_costmap"
+                  default="{local_costmap}"/>
+      <input_port name="turn_radius"
+                  default="{turn_radius}"/>
+      <output_port name="adjusted_path"
+                   default="{adjusted_path}"/>
+      <input_port name="current_segment"
+                  default="{current_segment}"/>
+      <input_port name="odometry"
+                  default="{odometry}"/>
+      <input_port name="tf_buffer"
+                  default="{tf_buffer}"/>
+      <output_port name="adjusted_current_segment"
+                   default="{adjusted_current_segment}"/>
+      <output_port name="adjusted_cross_track_error"
+                   default="{adjusted_cross_track_error}"/>
+      <output_port name="adjusted_along_track_progress"
+                   default="{adjusted_along_track_progress}"/>
+      <output_port name="adjusted_segment_count"
+                   default="{adjusted_segment_count}"/>
+    </Action>
     <Condition ID="AllTasksDoneCondition"
                editable="true">
       <input_port name="task_list"
@@ -545,6 +592,8 @@
                   default="{robot_footprint}"/>
       <input_port name="context"
                   default="{context}"/>
+      <output_port name="local_costmap"
+                   default="{local_costmap}"/>
     </Action>
     <Action ID="VisualizeTrajectory"
             editable="true">
