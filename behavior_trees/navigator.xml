@@ -73,7 +73,7 @@
                              pose="{goal_pose}"/>
       </Fallback>
       <Script name="SetHoverParametersScript"
-              code="hover_minimum_distance := robot_radius; hover_maximum_distance := robot_radius+robot_stopping_distance; hover_maximum_speed := robot_default_speed"/>
+              code="hover_minimum_distance := robot_radius*1.25; hover_maximum_distance := robot_radius*1.25+robot_stopping_distance*1.25; hover_maximum_speed := robot_default_speed*0.75"/>
       <KeepRunningUntilFailure>
         <ReactiveFallback>
           <Hover goal_pose="{goal_pose}"
@@ -133,12 +133,15 @@
                      _autoremap="true"/>
             <ReactiveFallback name="RunTaskByType">
               <SubTree ID="HoverTask"
+                       lead_in_distance="0.0"
                        _failureIf="current_task_type != &apos;hover&apos;"
                        _autoremap="true"/>
               <SubTree ID="GotoTask"
+                       lead_in_distance="0.0"
                        _failureIf="current_task_type != &quot;goto&quot;"
                        _autoremap="true"/>
               <SubTree ID="SurveyLineTask"
+                       lead_in_distance="{survey_lead_in_distance}"
                        _failureIf="current_task_type != &apos;survey_line&apos;"
                        _autoremap="true"/>
               <SubTree ID="SurveyAreaTask"
@@ -170,6 +173,7 @@
                      _autoremap="true"/>
             <ReactiveFallback>
               <SubTree ID="SurveyLineTask"
+                       lead_in_distance="{survey_lead_in_distance}"
                        current_task="{current_survey_area_task}"
                        _failureIf="current_survey_area_task_type != &apos;survey_line&apos;"
                        _autoremap="true"/>
@@ -209,6 +213,7 @@
           <GeneratePlan start_pose="{current_pose}"
                         goal_pose="{goal_pose}"
                         planner="{default_planner}"
+                        lead_in_distance="{lead_in_distance}"
                         navigation_trajectory="{navigation_path}"
                         turn_radius="{robot_turn_radius}"
                         current_navigation_segment="{current_navigation_segment}"/>
@@ -241,6 +246,7 @@
             <GeneratePlan start_pose="{current_pose}"
                           goal_pose="{goal_pose}"
                           planner="{default_planner}"
+                          lead_in_distance="{lead_in_distance}"
                           navigation_trajectory="{navigation_path}"
                           turn_radius="{robot_turn_radius}"
                           current_navigation_segment="{current_navigation_segment}"/>
@@ -347,6 +353,8 @@
                   default="{goal_pose}"/>
       <input_port name="planner"
                   default="{default_planner}"/>
+      <input_port name="lead_in_distance"
+                  default="{lead_in_distance}"/>
       <output_port name="navigation_trajectory"
                    default="{navigation_trajectory}"/>
       <input_port name="turn_radius"
