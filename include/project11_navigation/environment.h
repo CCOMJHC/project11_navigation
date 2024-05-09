@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <project11_nav_msgs/RobotState.h>
+#include <project11_navigation/occupancy_grid.h>
 
 namespace project11_navigation
 {
@@ -34,8 +35,11 @@ public:
   Snapshot snapshot(bool dynamic_only=false) const;
 
   std::string mapFrame() const;
+
+  std::shared_ptr<OccupancyGrid> localCostmap() const;
   
 private:
+  void occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr &data);
 
   struct Grid
   {
@@ -48,6 +52,9 @@ private:
 
   std::map<std::string, Grid> static_grids_;
   std::map<std::string, Grid> dynamic_grids_;
+
+  ros::Subscriber local_costmap_subscriber_;
+  nav_msgs::OccupancyGrid local_costmap_;
 };
 
 

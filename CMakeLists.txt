@@ -42,6 +42,7 @@ include_directories(
 set(NAVIGATOR_LIB_SOURCES
   src/context.cpp
   src/environment.cpp
+  src/occupancy_grid.cpp
   src/platform.cpp
   src/robot_capabilities.cpp
   src/task.cpp
@@ -71,6 +72,7 @@ target_link_libraries(navigator
 )
 
 set(BT_PLUGIN_SOURCES
+  src/actions/adjust_path.cpp
   src/actions/baxevani_controller.cpp
   src/actions/crabbing_path_follower.cpp
   src/actions/debug_blackboard.cpp

@@ -3,6 +3,20 @@
     <include path="navigator.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
+        <Action ID="AdjustPath" editable="true">
+            <input_port name="path" default="{path}"/>
+            <input_port name="local_costmap" default="{local_costmap}"/>
+            <input_port name="turn_radius" default="{turn_radius}"/>
+            <output_port name="adjusted_path" default="{adjusted_path}"/>
+            <input_port name="current_segment" default="{current_segment}"/>
+            <input_port name="odometry" default="{odometry}"/>
+            <input_port name="tf_buffer" default="{tf_buffer}"/>
+            <output_port name="adjusted_current_segment" default="{adjusted_current_segment}"/>
+            <output_port name="adjusted_cross_track_error" default="{adjusted_cross_track_error}"/>
+            <output_port name="adjusted_along_track_progress" default="{adjusted_along_track_progress}"/>
+            <output_port name="adjusted_segment_count" default="{adjusted_segment_count}"/>
+            <input_port name="along_track_progress" default="{current_segment_along_track_progress}"/>
+        </Action>
         <Condition ID="AllTasksDoneCondition" editable="true">
             <input_port name="task_list" default="{task_list}"/>
         </Condition>
@@ -153,6 +167,7 @@
             <output_port name="marker_array" default="{marker_array}">Pointer to a visualization marker array</output_port>
             <input_port name="robot_footprint" default="{robot_footprint}"/>
             <input_port name="context" default="{context}"/>
+            <output_port name="local_costmap" default="{local_costmap}"/>
         </Action>
         <Action ID="VisualizeTrajectory" editable="true">
             <input_port name="trajectory" default="{navigation_trajectory}">Pointer to a vector of PoseStamped</input_port>
