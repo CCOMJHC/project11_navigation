@@ -196,6 +196,32 @@
                        current_task="{current_survey_area_task}"
                        _failureIf="current_survey_area_task_type != &apos;survey_line&apos;"
                        _autoremap="true"/>
+              <Sequence name="SubSurveyAreaSequence"
+                        _failureIf="current_survey_area_task_type != &apos;survey_area&apos;">
+                <GetSubTasks task="{current_survey_area_task}"
+                             sub_tasks="{sub_survey_area_tasks}"/>
+                <WhileDoElse>
+                  <AllTasksDoneCondition task_list="{sub_survey_area_tasks}"/>
+                  <SetTaskDone task="{current_survey_area_task}"/>
+                  <KeepRunningUntilFailure>
+                    <ReactiveSequence>
+                      <SubTree ID="UpdateCurrentTaskData"
+                               current_task_id="{current_sub_survey_area_task_id}"
+                               current_task_type="{current_sub_survey_area_task_type}"
+                               current_task="{current_sub_survey_area_task}"
+                               task_list="{sub_survey_area_tasks}"
+                               _autoremap="true"/>
+                      <ReactiveFallback>
+                        <SubTree ID="SurveyLineTask"
+                                 current_task="{current_sub_survey_area_task}"
+                                 _failureIf="current_sub_survey_area_task_type != &apos;survey_line&apos;"
+                                 _autoremap="true"/>
+                        <SetTaskDone task="{current_sub_survey_area_task}"/>
+                      </ReactiveFallback>
+                    </ReactiveSequence>
+                  </KeepRunningUntilFailure>
+                </WhileDoElse>
+              </Sequence>
               <SetTaskDone task="{current_survey_area_task}"/>
             </ReactiveFallback>
           </ReactiveSequence>
