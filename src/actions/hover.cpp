@@ -86,7 +86,7 @@ BT::NodeStatus Hover::tick()
     auto current_target_speed = 0.0;
 
     double turn_effort = current_range/maximum_distance.value();
-    turn_effort = std::min(0.5, turn_effort);
+    turn_effort = std::min(1.0, turn_effort)*0.35;
 
     if (current_range >= maximum_distance.value())
       current_target_speed = maximum_speed.value();
@@ -97,10 +97,17 @@ BT::NodeStatus Hover::tick()
     }
     else
     {
+      float p = 0.1*(1.0-(current_range/minimum_distance.value()));
+      current_target_speed = -p*maximum_speed.value(); // apply some reverse, up to 10%
+
       // in the zero speed zone so don't turn towards target if it's behind us
-      if(abs(current_bearing.value()) > M_PI/2.0)
-        current_bearing += M_PI;
-      turn_effort*= 0.2;
+      // if(abs(current_bearing.value()) > M_PI/2.0)
+      // {
+      //   current_bearing += M_PI;
+      //   float p = 0.1*(current_range/minimum_distance.value());
+      //   current_target_speed = -p*maximum_speed.value(); // apply some reverse, up to 10%
+      // }
+      //turn_effort*= 0.2;
     }
     
 

@@ -23,6 +23,7 @@ BT::PortsList GeneratePlan::providedPorts()
     BT::InputPort<geometry_msgs::PoseStamped>("goal_pose"),
     BT::InputPort<std::string>("planner"),
     BT::InputPort<double>("turn_radius"),
+    BT::InputPort<double>("lead_in_distance"),
     BT::OutputPort<std::shared_ptr<std::vector<geometry_msgs::PoseStamped> > >("navigation_trajectory"),
     BT::OutputPort<int>("current_navigation_segment")
   };
@@ -48,6 +49,13 @@ BT::NodeStatus GeneratePlan::tick()
     throw BT::RuntimeError(name(), " missing required input [turn_radius]: ", turn_radius.error() );
   }
 
+  auto lead_in_distance = getInput<double>("lead_in_distance");
+  if(!lead_in_distance)
+  {
+    throw BT::RuntimeError(name(), " missing required input [lead_in_distance]: ", lead_in_distance.error() );
+  }
+
+
   double start[3];
   start[0] = start_pose.value().pose.position.x;
   start[1] = start_pose.value().pose.position.y;
@@ -58,6 +66,14 @@ BT::NodeStatus GeneratePlan::tick()
   target[1] = goal_pose.value().pose.position.y;
   target[2] = tf2::getYaw(goal_pose.value().pose.orientation);
 
+  if(lead_in_distance.value() > 0.0)
+  {
+    auto cos_yaw = cos(target[2]);
+    auto sin_yaw = sin(target[2]);
+    target[0] -= lead_in_distance.value()*cos_yaw;
+    target[1] -= lead_in_distance.value()*sin_yaw;
+  }
+
   DubinsPath path;
 
   if(dubins_shortest_path(&path, start, target, turn_radius.value()) == 0)
@@ -66,7 +82,7 @@ BT::NodeStatus GeneratePlan::tick()
     auto step_size = turn_radius.value() / 5.0;
     auto nav_trajectory = std::make_shared<std::vector<geometry_msgs::PoseStamped> >();
     nav_trajectory->push_back(start_pose.value());
-    double current_length = 0.0;
+    double current_length = step_size;
     while(current_length < path_length)
     {
       double q[3];
