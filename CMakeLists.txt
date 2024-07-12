@@ -81,6 +81,7 @@ set(BT_PLUGIN_SOURCES
   src/actions/get_task_data_string.cpp
   src/actions/get_sub_tasks.cpp
   src/actions/hover.cpp
+  src/actions/multibeam_coverage_action.cpp
   src/actions/navigator_settings_loader.cpp
   src/actions/predict_stopping_pose.cpp
   src/actions/robot_capabilities_loader.cpp

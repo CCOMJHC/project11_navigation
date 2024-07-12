@@ -57,6 +57,7 @@
             <input_port name="start_pose" default="{current_pose}"/>
             <input_port name="goal_pose" default="{goal_pose}"/>
             <input_port name="planner" default="{default_planner}"/>
+            <input_port name="lead_in_distance" default="{lead_in_distance}"/>
             <output_port name="navigation_trajectory" default="{navigation_trajectory}"/>
             <input_port name="turn_radius" default="{robot_turn_radius}"/>
             <output_port name="current_navigation_segment" default="{current_navigation_segment}">Index of the current segment of the navigation trajectory</output_port>
@@ -92,6 +93,10 @@
             <output_port name="command_velocity" default="{command_velocity}"/>
             <input_port name="odometry" default="{odometry}"/>
             <input_port name="marker_array" default="{marker_array}"/>
+        </Action>
+        <Action ID="MultibeamCoverageAction" editable="true">
+            <input_port name="task" default="{task}"/>
+            <input_port name="ros_action"/>
         </Action>
         <Action ID="NavigatorSettingsLoader" editable="true">
             <output_port name="waypoint_reached_distance" default="{waypoint_reached_distance}">Distance in meters within which a waypoint is deemed reached</output_port>

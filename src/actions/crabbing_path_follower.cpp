@@ -163,4 +163,4 @@ void CrabbingPathFollower::onHalted()
 }
 
 
-} // namespace path_follower
+}

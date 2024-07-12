@@ -7,6 +7,7 @@
 #include <project11_navigation/actions/get_task_data_string.h>
 #include <project11_navigation/actions/get_sub_tasks.h>
 #include <project11_navigation/actions/hover.h>
+#include <project11_navigation/actions/multibeam_coverage_action.h>
 #include <project11_navigation/actions/navigator_settings_loader.h>
 #include <project11_navigation/actions/predict_stopping_pose.h>
 #include <project11_navigation/actions/robot_capabilities_loader.h>
@@ -34,6 +35,7 @@ BT_REGISTER_NODES(factory)
   factory.registerNodeType<project11_navigation::GetTaskDataString>("GetTaskDataString");
   factory.registerNodeType<project11_navigation::GetSubTasks>("GetSubTasks");
   factory.registerNodeType<project11_navigation::Hover>("Hover");
+  factory.registerNodeType<project11_navigation::MultibeamCoverageAction>("MultibeamCoverageAction");
   factory.registerNodeType<project11_navigation::NavigatorSettingsLoader>("NavigatorSettingsLoader");
   factory.registerNodeType<project11_navigation::PredictStoppingPose>("PredictStoppingPose");
   factory.registerNodeType<project11_navigation::RobotCapabilitiesLoader>("RobotCapabilitiesLoader");

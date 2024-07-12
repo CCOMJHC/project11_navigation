@@ -22,6 +22,6 @@ private:
   ros::Publisher crab_angle_publisher_;
 };
 
-} // namespace path_follower
+} // namespace project11_navigation
 
 #endif
