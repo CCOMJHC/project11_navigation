@@ -1,5 +1,5 @@
 <launch>
-  <arg name="map_frame" value="map"/>
+  <arg name="map_frame" default="map"/>
 
   <node pkg="project11_navigation" type="navigator" name="navigator">
     <remap from="~/cmd_vel" to="project11/piloting_mode/autonomous/cmd_vel"/>

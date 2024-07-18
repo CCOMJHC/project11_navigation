@@ -46,7 +46,7 @@ BT::NodeStatus MultibeamCoverageAction::onStart()
       p.z = vertex.pose.position.z;
       goal.survey_area.polygon.points.push_back(p);
     }
-    action_client_->sendGoal(goal, &MultibeamCoverageAction::actionDoneCallback);
+    //action_client_->sendGoal(goal, &MultibeamCoverageAction::actionDoneCallback);
   }
   return BT::NodeStatus::RUNNING;
 }
