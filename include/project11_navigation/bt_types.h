@@ -10,6 +10,7 @@
 #include <geometry_msgs/Accel.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Point.h>
+#include <project11_navigation/actions/multibeam_coverage_action.h>
 
 namespace BT
 {
@@ -76,6 +77,8 @@ void Vector3ToJson(nlohmann::json& dest, const geometry_msgs::Vector3& vector);
 
 
 void TaskPtrToJson(nlohmann::json& dest, const std::shared_ptr<Task>& task);
+
+void MultibeamCoverageActionClientPtrToJson(nlohmann::json& dest, const std::shared_ptr<MultibeamCoverageActionClient>& mbcc);
 
 
 } // namespace project11_navigation

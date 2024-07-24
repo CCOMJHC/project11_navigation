@@ -16,6 +16,7 @@
   </node>
 
   <node pkg="manda_coverage" type="manda_coverage_node" name="manda_coverage">
+    <param name="soundings_topic" value="sensors/mbes/soundings"/>
   </node>
 
   <rosparam file="$(find project11_navigation)/config/default_stack.yaml" command="load"/>

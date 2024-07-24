@@ -21,6 +21,7 @@
   <depend>project11_nav_msgs</depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>std_msgs</depend>
   <depend>tf2</depend>
   <depend>visualization_msgs</depend>
   <depend>yaml-cpp</depend>

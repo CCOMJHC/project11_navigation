@@ -43,6 +43,8 @@ private:
   ros::Subscriber odom_sub_;
 
   ros::Publisher display_pub_;
+  ros::Publisher navigation_state_publisher_;
+  std::string last_navigation_state_;
 
   BT::Tree tree_;
   BT::Blackboard::Ptr blackboard_;

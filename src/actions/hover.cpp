@@ -170,7 +170,8 @@ BT::NodeStatus Hover::tick()
   }
   catch (tf2::TransformException &ex)
   {
-    throw BT::RuntimeError(name(), " transform exception, odom child frame: ", odom.value().child_frame_id, " goal frame: ", goal_pose.value().header.frame_id, " ex: ", ex.what());
+    return BT::NodeStatus::FAILURE;
+    //throw BT::RuntimeError(name(), " transform exception, odom child frame: ", odom.value().child_frame_id, " goal frame: ", goal_pose.value().header.frame_id, " ex: ", ex.what());
   }
   return BT::NodeStatus::FAILURE;
 }

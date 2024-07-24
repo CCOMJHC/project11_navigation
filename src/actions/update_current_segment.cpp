@@ -33,9 +33,9 @@ BT::PortsList UpdateCurrentSegment::providedPorts()
 BT::NodeStatus UpdateCurrentSegment::tick()
 {
   auto navigation_path_bb = getInput<std::shared_ptr<std::vector< geometry_msgs::PoseStamped> > >("navigation_path");
-  if(!navigation_path_bb)
+  if(!navigation_path_bb || !navigation_path_bb.value())
   {
-    throw BT::RuntimeError("missing required input [navigation_path]: ", navigation_path_bb.error() );
+    return BT::NodeStatus::FAILURE;
   }
   auto navigation_path = navigation_path_bb.value();
 

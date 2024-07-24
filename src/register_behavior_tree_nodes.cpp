@@ -1,5 +1,6 @@
 #include <project11_navigation/actions/adjust_path.h>
 #include <project11_navigation/actions/baxevani_controller.h>
+#include <project11_navigation/actions/clear_path.h>
 #include <project11_navigation/actions/crabbing_path_follower.h>
 #include <project11_navigation/actions/debug_blackboard.h>
 #include <project11_navigation/actions/generate_plan.h>
@@ -28,6 +29,7 @@ BT_REGISTER_NODES(factory)
 {
   factory.registerNodeType<project11_navigation::AdjustPath>("AdjustPath");
   factory.registerNodeType<project11_navigation::BaxevaniController>("BaxevaniController");
+  factory.registerNodeType<project11_navigation::ClearPath>("ClearPath");
   factory.registerNodeType<project11_navigation::CrabbingPathFollower>("CrabbingPathFollower");
   factory.registerNodeType<project11_navigation::DebugBlackboard>("DebugBlackboard");
   factory.registerNodeType<project11_navigation::GeneratePlan>("GeneratePlan");
@@ -35,7 +37,10 @@ BT_REGISTER_NODES(factory)
   factory.registerNodeType<project11_navigation::GetTaskDataString>("GetTaskDataString");
   factory.registerNodeType<project11_navigation::GetSubTasks>("GetSubTasks");
   factory.registerNodeType<project11_navigation::Hover>("Hover");
-  factory.registerNodeType<project11_navigation::MultibeamCoverageAction>("MultibeamCoverageAction");
+  factory.registerNodeType<project11_navigation::MultibeamCoverageActionCancel>("MultibeamCoverageActionCancel");
+  factory.registerNodeType<project11_navigation::MultibeamCoverageActionDoneCondition>("MultibeamCoverageActionDoneCondition");
+  factory.registerNodeType<project11_navigation::MultibeamCoverageActionSetGoal>("MultibeamCoverageActionSetGoal");
+  factory.registerNodeType<project11_navigation::MultibeamCoverageActionUpdateTask>("MultibeamCoverageActionUpdateTask");
   factory.registerNodeType<project11_navigation::NavigatorSettingsLoader>("NavigatorSettingsLoader");
   factory.registerNodeType<project11_navigation::PredictStoppingPose>("PredictStoppingPose");
   factory.registerNodeType<project11_navigation::RobotCapabilitiesLoader>("RobotCapabilitiesLoader");
