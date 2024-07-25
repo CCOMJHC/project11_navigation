@@ -138,7 +138,7 @@ BT::NodeStatus AdjustPath::tick()
           if(v > 0)
             total_cost += v*delta;
         }
-        ROS_INFO_STREAM("total cost: " << total_cost);
+        ROS_DEBUG_STREAM("total cost: " << total_cost);
 
         if(adjusted_path->size() > 2)
         {
