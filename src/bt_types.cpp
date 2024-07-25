@@ -22,6 +22,7 @@ void registerJsonDefinitions()
   BT::RegisterJsonDefinition<geometry_msgs::Vector3>(Vector3ToJson);
 
   BT::RegisterJsonDefinition<std::shared_ptr<Task> >(TaskPtrToJson);
+  BT::RegisterJsonDefinition<std::shared_ptr<MultibeamCoverageActionClient> >(MultibeamCoverageActionClientPtrToJson);
 }
 
 // std_msgs
@@ -119,6 +120,24 @@ void TaskPtrToJson(nlohmann::json& dest, const std::shared_ptr<Task>& task)
   }
 }
 
-
+void MultibeamCoverageActionClientPtrToJson(nlohmann::json& dest, const std::shared_ptr<MultibeamCoverageActionClient>& client)
+{
+  if(!client)
+    dest["action_client"] = "null";
+  else
+  {
+    dest["line_count"] = client->lineCount();
+    dest["last_line_number"] = client->lastLineNumber();
+    dest["done"] = client->done();
+    auto sac = client->actionClient();
+    if(sac)
+      dest["simple_action_client"] = "null";
+    else
+    {
+      dest["server_connected"] = sac->isServerConnected();
+      dest["simple_action_client_state"] = sac->getState().getText();
+    }
+  }
+}
 
 } // namespace project11_navigation

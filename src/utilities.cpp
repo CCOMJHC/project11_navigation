@@ -1,4 +1,6 @@
 #include <project11_navigation/utilities.h>
+#include <project11/utils.h>
+#include <tf2/utils.h>
 
 namespace project11_navigation
 {
@@ -21,6 +23,29 @@ void adjustTrajectoryForSpeed(std::vector<geometry_msgs::PoseStamped>& trajector
     next++;
   }
 
+}
+
+void adjustPathOrientations(std::vector<geometry_msgs::PoseStamped>& path)
+{
+  auto last = path.begin();
+  auto next = last;
+  if(next != path.end())
+    next++;
+  while(next != path.end())
+  {
+    gz4d::Vector<double, 2> last_point(last->pose.position.x, last->pose.position.y);
+    gz4d::Vector<double, 2> next_point(next->pose.position.x, next->pose.position.y);
+    auto diff = next_point-last_point;
+    auto unit_diff = normalize(diff);
+    auto cos_theta = unit_diff.dot(gz4d::Vector<double, 2>(1.0, 0.0));
+    auto theta = acos(cos_theta);
+    tf2::Quaternion q;
+    q.setRPY(0.0, 0.0, theta);
+    last->pose.orientation = tf2::toMsg(q);
+    next->pose.orientation = last->pose.orientation;
+    last = next;
+    next++;
+  }
 }
 
 geometry_msgs::Vector3 vectorBetween(const geometry_msgs::Pose& from, const geometry_msgs::Pose& to)

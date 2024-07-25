@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   project11_nav_msgs
   roscpp
   rospy
+  std_msgs
   tf2
   visualization_msgs
 )
@@ -30,7 +31,7 @@ generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES project11_navigation
-  CATKIN_DEPENDS actionlib actionlib_msgs behaviortree_cpp costmap_2d dubins_curves geometry_msgs grid_map_ros nav_core pluginlib project11_nav_msgs roscpp rospy tf2 visualization_msgs yaml-cpp
+  CATKIN_DEPENDS actionlib actionlib_msgs behaviortree_cpp costmap_2d dubins_curves geometry_msgs grid_map_ros nav_core pluginlib project11_nav_msgs roscpp rospy std_msgs tf2 visualization_msgs yaml-cpp
 #  DEPENDS system_lib
 )
 
@@ -60,6 +61,7 @@ set(NAVIGATOR_SOURCES
   src/main.cpp
   src/navigator.cpp
   src/robot.cpp
+  src/actions/multibeam_coverage_action.cpp
 )
 
 add_executable(navigator ${NAVIGATOR_SOURCES})
@@ -74,6 +76,7 @@ target_link_libraries(navigator
 set(BT_PLUGIN_SOURCES
   src/actions/adjust_path.cpp
   src/actions/baxevani_controller.cpp
+  src/actions/clear_path.cpp
   src/actions/crabbing_path_follower.cpp
   src/actions/debug_blackboard.cpp
   src/actions/generate_plan.cpp
@@ -81,6 +84,7 @@ set(BT_PLUGIN_SOURCES
   src/actions/get_task_data_string.cpp
   src/actions/get_sub_tasks.cpp
   src/actions/hover.cpp
+  src/actions/multibeam_coverage_action.cpp
   src/actions/navigator_settings_loader.cpp
   src/actions/predict_stopping_pose.cpp
   src/actions/robot_capabilities_loader.cpp

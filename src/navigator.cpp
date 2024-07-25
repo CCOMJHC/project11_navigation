@@ -6,6 +6,7 @@
 #include <project11_navigation/task_list.h>
 #include <filesystem>
 #include <project11_navigation/bt_types.h>
+#include <std_msgs/String.h>
 
 namespace project11_navigation
 {
@@ -23,6 +24,7 @@ Navigator::Navigator(std::string name):
   context_ = std::make_shared<Context>();
 
   display_pub_ = private_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
+  navigation_state_publisher_ = private_nh.advertise<std_msgs::String>("navigation_state", 10, true);
 
   blackboard_ = BT::Blackboard::create();
 
@@ -114,10 +116,12 @@ void Navigator::odometryCallback(const nav_msgs::Odometry::ConstPtr& msg)
             result.tasks = task_list->taskMessages();
         }
         action_server_.setSucceeded(result);
+        last_navigation_state_ = "";
         break;
       }
       case BT::NodeStatus::FAILURE:
         action_server_.setAborted();
+        last_navigation_state_ = "";
         break;
       case BT::NodeStatus::RUNNING:
       {
@@ -133,6 +137,19 @@ void Navigator::odometryCallback(const nav_msgs::Odometry::ConstPtr& msg)
           auto ma = marker_array->value.cast<std::shared_ptr<visualization_msgs::MarkerArray> >();
           if(ma)
             display_pub_.publish(*ma);
+        }
+
+        auto nav_state = blackboard_->getEntry("navigation_state");
+        if(nav_state && nav_state->value.isType<std::string>())
+        {
+          auto new_nav_state = nav_state->value.cast<std::string>();
+          if(new_nav_state != last_navigation_state_)
+          {
+            std_msgs::String nav_state_msg;
+            nav_state_msg.data = new_nav_state;
+            navigation_state_publisher_.publish(nav_state_msg);
+            last_navigation_state_ = new_nav_state;
+          }
         }
       }
       break;

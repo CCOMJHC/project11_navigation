@@ -3,6 +3,7 @@
       main_tree_to_execute="NavigatorSequence">
   <BehaviorTree ID="FollowPath">
     <ReactiveSequence>
+      <Script code="debug := false"/>
       <UpdateCurrentSegment navigation_path="{navigation_path}"
                             odometry="{odometry}"
                             tf_buffer="{tf_buffer}"
@@ -41,7 +42,8 @@
                            current_color=".25, .55, .5, .75"
                            future_color=".15, .45, .2, .5"
                            current_segment="{adjusted_current_segment}"
-                           current_pose="{current_pose}"/>
+                           current_pose="{current_pose}"
+                           _skipIf="debug != true"/>
       <Fallback>
         <BaxevaniController navigation_path="{navigation_path}"
                             current_navigation_segment="{current_navigation_segment}"
@@ -98,6 +100,9 @@
               code="hover_minimum_distance := robot_radius*1.25; hover_maximum_distance := robot_radius*1.25+robot_stopping_distance*1.25; hover_maximum_speed := robot_default_speed*0.75"/>
       <KeepRunningUntilFailure>
         <ReactiveFallback>
+          <ForceFailure>
+            <Script code="navigation_state := &quot;hover&quot;"/>
+          </ForceFailure>
           <Hover goal_pose="{goal_pose}"
                  tf_buffer="{tf_buffer}"
                  minimum_distance="{hover_minimum_distance}"
@@ -152,6 +157,7 @@
                          robot_footprint="{robot_footprint}"
                          context="{context}"
                          local_costmap="{local_costmap}"/>
+            <Script code="navigation_state := piloting_mode"/>
             <SubTree ID="UpdateCurrentTaskData"
                      _autoremap="true"/>
             <ReactiveFallback name="RunTaskByType">
@@ -165,9 +171,15 @@
                        _autoremap="true"/>
               <SubTree ID="SurveyLineTask"
                        lead_in_distance="{survey_lead_in_distance}"
+                       survey_line_task="{current_task}"
                        _failureIf="current_task_type != &apos;survey_line&apos;"
                        _autoremap="true"/>
+              <SubTree ID="SurveyLineSetTask"
+                       survey_line_set_task="{current_task}"
+                       _failureIf="current_task_type != &apos;survey_line_set&apos;"
+                       _autoremap="true"/>
               <SubTree ID="SurveyAreaTask"
+                       survey_area_task="{current_task}"
                        _failureIf="current_task_type != &apos;survey_area&apos;"
                        _autoremap="true"/>
               <SetTaskDone name="SkipUnknownTaskType"
@@ -181,105 +193,206 @@
 
   <BehaviorTree ID="SurveyAreaTask">
     <Sequence>
-      <GetSubTasks task="{current_task}"
-                   sub_tasks="{survey_area_tasks}"/>
+      <GetTaskDataString task="{survey_area_task}"
+                         key="coverage_generator"
+                         default_value="none"
+                         value="{coverage_generator}"/>
+      <Sequence>
+        <IfThenElse>
+          <ScriptCondition code="coverage_generator == &apos;manda&apos;"/>
+          <Sequence>
+            <MultibeamCoverageActionSetGoal name="MandaMultibeamCoverageAction"
+                                            task="{survey_area_task}"
+                                            ros_action="survey_area_action"
+                                            action_client="{multibeam_coverage_action_client}"/>
+            <ReactiveSequence>
+              <MultibeamCoverageActionUpdateTask action_client="{multibeam_coverage_action_client}"
+                                                 task="{survey_area_task}"/>
+              <GetSubTasks task="{survey_area_task}"
+                           sub_tasks="{survey_area_tasks}"/>
+              <WhileDoElse>
+                <ReactiveSequence>
+                  <MultibeamCoverageActionDoneCondition action_client="{multibeam_coverage_action_client}"/>
+                  <AllTasksDoneCondition task_list="{survey_area_tasks}"/>
+                </ReactiveSequence>
+                <SetTaskDone task="{survey_area_task}"/>
+                <KeepRunningUntilFailure>
+                  <ReactiveSequence>
+                    <SubTree ID="UpdateCurrentTaskData"
+                             current_task="{current_survey_area_task}"
+                             current_task_id="{current_survey_area_task_id}"
+                             current_task_type="{current_survey_area_task_type}"
+                             task_list="{survey_area_tasks}"
+                             _autoremap="true"/>
+                    <IfThenElse>
+                      <ScriptCondition code="current_survey_area_task_type == &apos;survey_line&apos;"/>
+                      <SubTree ID="SurveyLineTask"
+                               survey_line_task="{current_survey_area_task}"
+                               lead_in_distance="{survey_lead_in_distance}"
+                               _autoremap="true"/>
+                      <AlwaysSuccess/>
+                    </IfThenElse>
+                  </ReactiveSequence>
+                </KeepRunningUntilFailure>
+              </WhileDoElse>
+            </ReactiveSequence>
+          </Sequence>
+          <ReactiveSequence>
+            <GetSubTasks task="{survey_area_task}"
+                         sub_tasks="{survey_area_tasks}"/>
+            <WhileDoElse>
+              <AllTasksDoneCondition task_list="{survey_area_tasks}"/>
+              <SetTaskDone task="{survey_area_task}"/>
+              <KeepRunningUntilFailure>
+                <ReactiveSequence>
+                  <SubTree ID="UpdateCurrentTaskData"
+                           current_task_id="{current_survey_area_task_id}"
+                           current_task_type="{current_survey_area_task_type}"
+                           current_task="{current_survey_area_task}"
+                           task_list="{survey_area_tasks}"
+                           _autoremap="true"/>
+                  <ReactiveFallback>
+                    <SubTree ID="SurveyLineTask"
+                             lead_in_distance="{survey_lead_in_distance}"
+                             current_task="{current_survey_area_task}"
+                             _failureIf="current_survey_area_task_type != &apos;survey_line&apos;"
+                             _autoremap="true"/>
+                    <SubTree ID="SurveyLineSetTask"
+                             name="SurveyAreaSurveyLineSetTask"
+                             survey_line_set_task="{current_survey_area_task}"
+                             _failureIf="current_survey_area_task_type != &apos;survey_line_set&apos;"
+                             _autoremap="true"/>
+                    <SetTaskDone task="{current_survey_area_task}"/>
+                  </ReactiveFallback>
+                </ReactiveSequence>
+              </KeepRunningUntilFailure>
+            </WhileDoElse>
+          </ReactiveSequence>
+        </IfThenElse>
+        <SetTaskDone task="{survey_area_task}"/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SurveyLine">
+    <Sequence>
+      <IfThenElse>
+        <GoalReachedCondition odometry="{odometry}"
+                              goal_pose="{start_pose}"
+                              waypoint_reached_distance="{waypoint_reached_distance}"
+                              heading_accuracy="180"/>
+        <AlwaysSuccess/>
+        <SubTree ID="TransitTo"
+                 name="TransitToStartOfSurveyLine"
+                 goal_pose="{start_pose}"
+                 lead_in_distance="{survey_lead_in_distance}"
+                 _autoremap="true"/>
+      </IfThenElse>
+      <ReactiveSequence>
+        <Script code="navigation_state := &quot;survey_line&quot;"/>
+        <SubTree ID="FollowPath"
+                 navigation_path="{survey_path}"
+                 current_navigation_segment="{current_survey_path_segment}"
+                 _autoremap="true"/>
+      </ReactiveSequence>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="SurveyLineSetTask">
+    <ReactiveSequence>
+      <GetSubTasks task="{survey_line_set_task}"
+                   sub_tasks="{survey_line_set_sub_tasks}"/>
       <WhileDoElse>
-        <AllTasksDoneCondition task_list="{survey_area_tasks}"/>
-        <SetTaskDone task="{current_task}"/>
+        <AllTasksDoneCondition task_list="{survey_line_set_sub_tasks}"/>
+        <SetTaskDone task="{survey_line_set_task}"/>
         <KeepRunningUntilFailure>
           <ReactiveSequence>
             <SubTree ID="UpdateCurrentTaskData"
-                     current_task_id="{current_survey_area_task_id}"
-                     current_task_type="{current_survey_area_task_type}"
-                     current_task="{current_survey_area_task}"
-                     task_list="{survey_area_tasks}"
+                     current_task_id="{survey_line_set_sub_task_id}"
+                     current_task_type="{survey_line_set_sub_task_type}"
+                     current_task="{survey_line_set_sub_task}"
+                     task_list="{survey_line_set_sub_tasks}"
                      _autoremap="true"/>
             <ReactiveFallback>
               <SubTree ID="SurveyLineTask"
-                       lead_in_distance="{survey_lead_in_distance}"
-                       current_task="{current_survey_area_task}"
-                       _failureIf="current_survey_area_task_type != &apos;survey_line&apos;"
+                       name="SurveyLineSetSurveyLineTask"
+                       survey_line_task="{survey_line_set_sub_task}"
+                       _failureIf="survey_line_set_sub_task_type != &apos;survey_line&apos;"
                        _autoremap="true"/>
-              <SetTaskDone task="{current_survey_area_task}"/>
+              <SetTaskDone task="{survey_line_set_sub_task}"/>
             </ReactiveFallback>
           </ReactiveSequence>
         </KeepRunningUntilFailure>
       </WhileDoElse>
-    </Sequence>
+    </ReactiveSequence>
   </BehaviorTree>
 
   <BehaviorTree ID="SurveyLineTask">
     <Sequence>
-      <SetPoseFromTask task="{current_task}"
+      <SetPoseFromTask task="{survey_line_task}"
                        pose_index="0"
-                       pose="{goal_pose}"/>
-      <SubTree ID="TransitTo"
+                       pose="{start_pose}"/>
+      <SetTrajectoryFromTask task="{survey_line_task}"
+                             trajectory="{survey_path}"
+                             current_segment="{current_survey_path_segment}"/>
+      <SubTree ID="SurveyLine"
                _autoremap="true"/>
-      <SetTrajectoryFromTask task="{current_task}"
-                             trajectory="{navigation_path}"
-                             current_segment="{current_navigation_segment}"/>
-      <SubTree ID="FollowPath"
-               _autoremap="true"/>
-      <SetTaskDone task="{current_task}"/>
+      <SetTaskDone task="{survey_line_task}"/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="TransitTo">
-    <ReactiveFallback>
-      <GoalReachedCondition name="TransitGoalReachedCondition"
-                            odometry="{odometry}"
-                            goal_pose="{goal_pose}"
-                            waypoint_reached_distance="{waypoint_reached_distance}"
-                            heading_accuracy="180"/>
-      <Sequence>
-        <Fallback>
-          <GeneratePlan start_pose="{current_pose}"
-                        goal_pose="{goal_pose}"
-                        planner="{default_planner}"
-                        lead_in_distance="{lead_in_distance}"
-                        navigation_trajectory="{navigation_path}"
-                        turn_radius="{robot_turn_radius}"
-                        current_navigation_segment="{current_navigation_segment}"/>
-          <CCOMPlanner start_pose="{current_pose}"
-                       goal_pose="{goal_pose}"
-                       navigation_path="{navigation_path}"
-                       robot_capabilities="{robot_capabilities}"
-                       tf_buffer="{tf_buffer}"
-                       context="{context}"
-                       _skipIf="planner != &quot;ccom_planner&quot;"/>
-        </Fallback>
-        <ReactiveSequence name="GoalNotReachedReactiveSequence">
-          <ReactiveFallback>
-            <ReactiveSequence>
-              <UpdateCurrentSegment navigation_path="{navigation_path}"
+    <Sequence>
+      <ClearPath navigation_path="{transit_path}"/>
+      <ReactiveFallback>
+        <GoalReachedCondition name="TransitGoalReachedCondition"
+                              odometry="{odometry}"
+                              goal_pose="{goal_pose}"
+                              waypoint_reached_distance="{waypoint_reached_distance}"
+                              heading_accuracy="180"/>
+        <ReactiveSequence>
+          <Script code="navigation_state := &quot;transit&quot;"/>
+          <IfThenElse>
+            <ReactiveSequence name="PlanIsValidReactiveSequence">
+              <UpdateCurrentSegment navigation_path="{transit_path}"
                                     odometry="{odometry}"
                                     tf_buffer="{tf_buffer}"
-                                    current_segment="{current_navigation_segment}"
-                                    segment_length="{current_segment_length}"
-                                    cross_track_error="{current_segment_cross_track_error}"
-                                    along_track_progress="{current_segment_along_track_progress}"
-                                    segment_count="{navigation_path_segment_count}"/>
-              <Inverter>
-                <PlanNeededCondition navigation_trajectory="{navigation_path}"
-                                     goal_pose="{goal_pose}"
-                                     maximum_cross_track_error="{maximum_cross_track_error}"
-                                     cross_track_error="{current_segment_cross_track_error}"/>
-              </Inverter>
+                                    current_segment="{current_transit_segment}"
+                                    segment_length="{current_transit_segment_length}"
+                                    cross_track_error="{current_transit_segment_cross_track_error}"
+                                    along_track_progress="{current_transit_segment_along_track_progress}"
+                                    segment_count="{transit_path_segment_count}"/>
+              <AlwaysSuccess name="CrossTrackErrorCheck"
+                             _failureIf="current_transit_segment_cross_track_error &gt; maximum_cross_track_error"/>
+              <AlwaysSuccess name="PastLastSegmentCheck"
+                             _failureIf="current_transit_segment &gt;= transit_path_segment_count"/>
             </ReactiveSequence>
-            <GeneratePlan start_pose="{current_pose}"
-                          goal_pose="{goal_pose}"
-                          planner="{default_planner}"
-                          lead_in_distance="{lead_in_distance}"
-                          navigation_trajectory="{navigation_path}"
-                          turn_radius="{robot_turn_radius}"
-                          current_navigation_segment="{current_navigation_segment}"/>
-          </ReactiveFallback>
+            <AlwaysSuccess/>
+            <Fallback>
+              <GeneratePlan start_pose="{current_pose}"
+                            goal_pose="{goal_pose}"
+                            planner="{default_planner}"
+                            lead_in_distance="{lead_in_distance}"
+                            navigation_trajectory="{transit_path}"
+                            turn_radius="{robot_turn_radius}"
+                            current_navigation_segment="{current_transit_segment}"/>
+              <CCOMPlanner start_pose="{current_pose}"
+                           goal_pose="{goal_pose}"
+                           navigation_path="{transit_path}"
+                           robot_capabilities="{robot_capabilities}"
+                           tf_buffer="{tf_buffer}"
+                           context="{context}"
+                           _skipIf="planner != &quot;ccom_planner&quot;"/>
+            </Fallback>
+          </IfThenElse>
           <SubTree ID="FollowPath"
                    name="TransitFollowPath"
+                   navigation_path="{transit_path}"
+                   current_navigation_segment="{current_transit_segment}"
                    _autoremap="true"/>
         </ReactiveSequence>
-      </Sequence>
-    </ReactiveFallback>
+      </ReactiveFallback>
+    </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="UpdateCurrentTaskData">
@@ -378,6 +491,11 @@
       <input_port name="context"
                   default="{context}"/>
     </Action>
+    <Action ID="ClearPath"
+            editable="true">
+      <output_port name="navigation_path"
+                   default="{navigation_path}"/>
+    </Action>
     <Action ID="CrabbingPathFollower"
             editable="true">
       <output_port name="command_velocity"
@@ -465,6 +583,26 @@
       <input_port name="marker_array"
                   default="{marker_array}"/>
     </Action>
+    <Condition ID="MultibeamCoverageActionDoneCondition"
+               editable="true">
+      <input_port name="action_client"
+                  default="{multibeam_coverage_action_client}"/>
+    </Condition>
+    <Action ID="MultibeamCoverageActionSetGoal"
+            editable="true">
+      <input_port name="task"
+                  default="{task}"/>
+      <input_port name="ros_action"/>
+      <output_port name="action_client"
+                   default="{multibeam_coverage_action_client}"/>
+    </Action>
+    <Action ID="MultibeamCoverageActionUpdateTask"
+            editable="true">
+      <input_port name="action_client"
+                  default="{multibeam_coverage_action_client}"/>
+      <input_port name="task"
+                  default="{task}"/>
+    </Action>
     <Action ID="NavigatorSettingsLoader"
             editable="true">
       <output_port name="waypoint_reached_distance"
@@ -474,17 +612,6 @@
       <output_port name="maximum_cross_track_error"
                    default="{maximum_cross_track_error}"/>
     </Action>
-    <Condition ID="PlanNeededCondition"
-               editable="true">
-      <input_port name="navigation_trajectory"
-                  default="{navigation_trajectory}">Current navigation plan or empty</input_port>
-      <input_port name="goal_pose"
-                  default="{goal_pose}"/>
-      <input_port name="maximum_cross_track_error"
-                  default="{maximum_cross_track_error}">Distance at which to be considered off-track for the purpose of needing to replan.</input_port>
-      <input_port name="cross_track_error"
-                  default="{cross_track_error}"/>
-    </Condition>
     <Action ID="PredictStoppingPose"
             editable="true">
       <input_port name="odometry"
