@@ -276,18 +276,20 @@
 
   <BehaviorTree ID="SurveyLine">
     <Sequence>
-      <IfThenElse>
-        <GoalReachedCondition odometry="{odometry}"
-                              goal_pose="{start_pose}"
-                              waypoint_reached_distance="{waypoint_reached_distance}"
-                              heading_accuracy="180"/>
-        <AlwaysSuccess/>
+      <WhileDoElse>
+        <Inverter>
+          <GoalReachedCondition odometry="{odometry}"
+                                goal_pose="{start_pose}"
+                                waypoint_reached_distance="{waypoint_reached_distance}"
+                                heading_accuracy="180"/>
+        </Inverter>
         <SubTree ID="TransitTo"
                  name="TransitToStartOfSurveyLine"
                  goal_pose="{start_pose}"
                  lead_in_distance="{survey_lead_in_distance}"
                  _autoremap="true"/>
-      </IfThenElse>
+        <AlwaysSuccess/>
+      </WhileDoElse>
       <ReactiveSequence>
         <Script code="navigation_state := &quot;survey_line&quot;"/>
         <SubTree ID="FollowPath"
