@@ -26,9 +26,12 @@ BT::NodeStatus GoalReached::tick()
   auto odom = getInput<nav_msgs::Odometry>("odometry");
   auto goal = getInput<geometry_msgs::PoseStamped>("goal_pose");
   auto distance = getInput<double>("waypoint_reached_distance");
+
   if(odom && goal && distance)
   {
-    if(length(vectorBetween(odom.value().pose.pose, goal.value().pose)) <= distance.value())
+    auto odom_at_surface = odom.value().pose.pose;
+    odom_at_surface.position.z = 0;
+    if(length(vectorBetween(odom_at_surface, goal.value().pose)) <= distance.value())
       return BT::NodeStatus::SUCCESS;
   }
   return BT::NodeStatus::FAILURE;
