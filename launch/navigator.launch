@@ -19,6 +19,6 @@
     <param name="soundings_topic" value="sensors/mbes/soundings"/>
   </node>
 
-  <rosparam file="$(find project11_navigation)/config/default_stack.yaml" command="load"/>
+  <rosparam file="$(find project11_navigation)/config/default_stack.yaml" command="load" ns="navigator"/>
 
 </launch>

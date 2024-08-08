@@ -26,6 +26,7 @@ BT::PortsList CrabbingPathFollower::providedPorts()
     BT::InputPort<nav_msgs::Odometry>("odometry"),
     BT::InputPort<std::shared_ptr<tf2_ros::Buffer> >("tf_buffer"),
     BT::InputPort<double>("target_speed"),
+    BT::InputPort<std::string>("piloting_mode"),
     BT::OutputPort<geometry_msgs::TwistStamped>("command_velocity"),
     BT::BidirectionalPort<std::shared_ptr<project11::PID> >("pid"),
   };
@@ -38,6 +39,14 @@ BT::NodeStatus CrabbingPathFollower::onStart()
 
 BT::NodeStatus CrabbingPathFollower::onRunning()
 {
+  auto piloting_mode = getInput<std::string>("piloting_mode");
+  if (!piloting_mode)
+  {
+    throw BT::RuntimeError("missing required input [piloting_mode]: ", piloting_mode.error() );
+  }
+  if(piloting_mode.value() != "autonomous")
+    return BT::NodeStatus::RUNNING;
+
   auto navigation_path_bb = getInput<std::shared_ptr<std::vector< geometry_msgs::PoseStamped> > >("navigation_path");
   if(!navigation_path_bb)
   {

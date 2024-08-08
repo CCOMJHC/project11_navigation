@@ -23,6 +23,7 @@ void registerJsonDefinitions()
 
   BT::RegisterJsonDefinition<std::shared_ptr<Task> >(TaskPtrToJson);
   BT::RegisterJsonDefinition<std::shared_ptr<MultibeamCoverageActionClient> >(MultibeamCoverageActionClientPtrToJson);
+  BT::RegisterJsonDefinition<std::shared_ptr<project11::PID> >(PidPtrToJson);
 }
 
 // std_msgs
@@ -139,5 +140,20 @@ void MultibeamCoverageActionClientPtrToJson(nlohmann::json& dest, const std::sha
     }
   }
 }
+
+// project11
+
+void PidPtrToJson(nlohmann::json& dest, const std::shared_ptr<project11::PID>& pid)
+{
+  if(!pid)
+    dest["pid"] = "null";
+  else
+  {
+    dest["Kp"] = pid->Kp();
+    dest["Ki"] = pid->Ki();
+    dest["Kd"] = pid->Kd();
+  }
+}
+
 
 } // namespace project11_navigation

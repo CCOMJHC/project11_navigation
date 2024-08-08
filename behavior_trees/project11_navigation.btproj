@@ -52,6 +52,7 @@
             <input_port name="odometry" default="{odometry}"/>
             <input_port name="current_navigation_segment" default="{current_navigation_segment}"/>
             <input_port name="target_speed" default="{target_speed}"/>
+            <input_port name="piloting_mode" default="{piloting_mode}"/>
         </Action>
         <Action ID="DebugBlackboard" editable="true">
             <input_port name="value"/>

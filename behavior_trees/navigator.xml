@@ -44,7 +44,7 @@
                            current_segment="{adjusted_current_segment}"
                            current_pose="{current_pose}"
                            _skipIf="debug != true"/>
-      <Fallback>
+      <ReactiveFallback>
         <BaxevaniController navigation_path="{navigation_path}"
                             current_navigation_segment="{current_navigation_segment}"
                             odometry="{odometry}"
@@ -64,9 +64,10 @@
                               odometry="{odometry}"
                               current_navigation_segment="{current_navigation_segment}"
                               target_speed="{target_speed}"
+                              piloting_mode="{piloting_mode}"
                               _failureIf="controller != &apos;crabbing_path_follower&apos;"/>
         <AlwaysFailure/>
-      </Fallback>
+      </ReactiveFallback>
     </ReactiveSequence>
   </BehaviorTree>
 
@@ -514,6 +515,8 @@
                   default="{current_navigation_segment}"/>
       <input_port name="target_speed"
                   default="{target_speed}"/>
+      <input_port name="piloting_mode"
+                  default="{piloting_mode}"/>
     </Action>
     <Action ID="GeneratePlan"
             editable="true">
